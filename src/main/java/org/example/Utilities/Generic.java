@@ -27,12 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax. xml. parsers. DocumentBuilder;
-import javax.xml.parsers. DocumentBuilderFactory;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-//import org.example.ExcelOperation;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.w3c.dom. Document;
@@ -184,14 +179,14 @@ public class Generic(){
                     String actualValue=String.valueOf(difference.getComparison().getTestDetails ().getValue ( ));
                     if (xPath==null) {
                         System.out.println("xpath-"+xPath);
-                        xPath=difference.getComparison ().getTestDetails ().getXPath();
+                        xPath=difference.getComparison ().getTestDetails ().getXPath();}
                         Pattern pattern =Pattern.compile("LoanApplication\\[\\d+\\]");
                         Matcher matcher=pattern.matcher (xPath);
                         matcher.find ( );
                         int start=matcher.start ( );
                         int end=matcher.end ( ) ;
                         String xPathRoot=xPath.substring(0,end);
-                        XPathRoot+="/applicationID";
+                        xPathRoot+="/applicationID";
                         XPathEngine xPathEngine=new JAXPXPathEngine();
                         String applicationID=xPathEngine.evaluate(xPathRoot, diff.getControlSource ( ));
                         modificationsNew.add (new XMLModification (xPath, expectedValue, actualValue,difference.toString(), applicationID));
@@ -237,7 +232,7 @@ public class Generic(){
                     cell.setCellStyle (styleHeader);
                     cell=headerRow.createCell (3);
                     cell.setCellValue ("Data in AfterCode XMI");
-                    cell.setCellstyle(styleHeader);
+                    cell.setCellStyle(styleHeader);
                     cell=headerRow.createCell (4);
                     cell.setCellValue ( "MisMatch Details");
                     cell.setCellStyle (styleHeader);
@@ -254,7 +249,7 @@ public class Generic(){
                         }
                         fileout=new FileOutputStream(excelFilePath);
                         workbook.write (fileout);
-                        fileout.close ( );}}
+                        fileout.close ( );}}}
 
                 public void runAndCopyFiles(){
                     try {
@@ -300,7 +295,7 @@ public class Generic(){
                                             runBat (Config.AL03);
                                             CopyFile(Config.folderAL03,Config.AfterFile);
                                         }if (tagName.equalsIgnoreCase("afterAL51")&&tagValue.equalsIgnoreCase("Y")) {
-                                            System.out.printIn("Run the batch of AL51");
+                                            System.out.println("Run the batch of AL51");
                                             runBat (Config.AL51);
                                             Thread.sleep (2000);
                                             CopyFile (Config.folderAL51, Config.AfterFile);
@@ -321,7 +316,7 @@ public class Generic(){
                     }
                 }
 
-                public void CopyFile(String srcFile, String desFile) throws IOException {
+                public void CopyFile (String srcFile, String desFile) throws IOException {
                     File sourceFile = new File(srcFile);
                     File destFile = new File (desFile);
 
@@ -344,6 +339,6 @@ public class Generic(){
                         e.printStackTrace ( );
                     }
                 }}
-
+}
 
 
