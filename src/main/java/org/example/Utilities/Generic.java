@@ -17,24 +17,12 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import java.awt.*;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.usermodel.Font;
-import org.w3c.dom. Document;
-import org.w3c. dom. Element;
-import org.w3c.dom. Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax. InputSource;
+
 import org. xmlunit. builder. DiffBuilder;
 import org.xmlunit.builder. Input;
 import org.xmlunit.diff.DefaultNodeMatcher;
@@ -239,7 +227,7 @@ public class Generic(){
                     for (XMLModification modification:modifications) {
                         Row row=sheet.createRow(rownumber++);
                         row.createCell (0).setCellValue (modification.getApplicationId ( ));
-                        row.createCell (1).setCellValue (modification.getXpath));
+                        row.createCell (1).setCellValue (modification.getXpath());
                         row.createCell (2).setCellValue (modification.getExpectedValue ( ));
                         row.createCell (3).setCellValue (modification.getActualValue ( ));
                         row.createCell (4).setCellValue (modification.getDescription ());
@@ -278,7 +266,7 @@ public class Generic(){
                                             Thread.sleep (20000);
                                             CopyFile (Config.folderAL03, Config. BeforeFile);
                                         }if (tagName.equalsIgnoreCase("beforeAL51")&&tagValue.equalsIgnoreCase("Y")) {
-                                            System.out.printin ("Run the batch of AL51");
+                                            System.out.println ("Run the batch of AL51");
                                             runBat (Config.AL51);
                                             CopyFile (Config.folderAL51, Config. BeforeFile);
                                         }if (tagName. equalsIgnoreCase ("beforeAL81")&&tagValue.equalsIgnoreCase("Y")) {
@@ -339,6 +327,6 @@ public class Generic(){
                         e.printStackTrace ( );
                     }
                 }}
-}
+
 
 

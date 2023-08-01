@@ -9,7 +9,7 @@ public class XMLModification {
 
     private String applicationId;
 
-    public XMLModification(String path, String expectedValue, String actualValue) {
+    public XMLModification(String xpath, String expectedValue, String actualValue) {
         this.xpath = xpath;
         this.expectedValue = expectedValue;
         this.actualValue = actualValue;
@@ -23,6 +23,10 @@ public class XMLModification {
         this.description=description;
         this.applicationId=applicationId;
 
+    }
+
+    public String getXpath(){
+        return xpath;
     }
     public String getExpectedValue(){
         return expectedValue;
