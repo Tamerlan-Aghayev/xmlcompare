@@ -32,7 +32,7 @@ import org.xmlunit.xpath.JAXPXPathEngine;
 import org.xmlunit.xpath.XPathEngine;
 
 
-public class Generic(){
+public class Generic{
         public static XSSFWorkbook workbook = new XSSFWorkbook ();
         public static FileOutputStream fileout = null;
 
@@ -237,7 +237,7 @@ public class Generic(){
                         }
                         fileout=new FileOutputStream(excelFilePath);
                         workbook.write (fileout);
-                        fileout.close ( );}}}
+                        fileout.close ( );}}
 
                 public void runAndCopyFiles(){
                     try {
