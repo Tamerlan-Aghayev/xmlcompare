@@ -6,6 +6,7 @@ public class XMLModification {
     private String expectedValue;
     private String actualValue;
     private String description;
+    private String action;
 
     private String applicationId;
 
@@ -41,5 +42,13 @@ public class XMLModification {
     }
     public String getApplicationId(){
         return applicationId;
+    }
+
+    public String getAction() {
+        return action;
+    }
+
+    public void setAction(String action) {
+        this.action = action;
     }
 }
