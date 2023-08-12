@@ -168,76 +168,39 @@ public class Generic{
         List<XMLModification> modificationsNew = new ArrayList<>();
         File file1 = new File(filePath1);
         File file2 = new File(filePath2);
-
-        NodeMatcher nodeMatcher = new DefaultNodeMatcher();
-        DifferenceEvaluator valueDifferenceEvaluator = DifferenceEvaluators.chain(
-                new DetailedDifferenceEvaluator(modificationsNew),
-                DifferenceEvaluators.Default
-        );
-
         Diff diff = DiffBuilder.compare(Input.fromFile(file1))
                 .withTest(Input.fromFile(file2))
-                .withNodeMatcher(nodeMatcher)
+                .withNodeMatcher(new DefaultNodeMatcher())
                 .checkForSimilar()
                 .ignoreWhitespace()
                 .ignoreComments()
-                .withDifferenceEvaluator(valueDifferenceEvaluator)
+                .withDifferenceEvaluator(new DetailedDifferenceEvaluator(modificationsNew))
                 .build();
-
         Iterable<Difference> differences = diff.getDifferences();
-        for (Difference difference : differences) {
-            String xPath = getXPathFromDifference(difference);
-            String expectedValue = getExpectedValueFromDifference(difference, file1);
-            String actualValue = getActualValueFromDifference(difference, file2);
 
-            if (xPath == null) {
-                System.out.println("xpath-" + xPath);
-                xPath = difference.getComparison().getTestDetails().getXPath();
-            }
+        for (Difference difference : differences) {
+            String xPath = difference.getComparison().getControlDetails().getXPath();
+            String expectedValue = String.valueOf(difference.getComparison().getControlDetails().getValue());
+            String actualValue = String.valueOf(difference.getComparison().getTestDetails().getValue());
 
             String applicationID = extractApplicationID(xPath, diff.getControlSource());
 
-            modificationsNew.add(new XMLModification(xPath, expectedValue, actualValue, difference.toString(), applicationID));
+            XMLModification modification = new XMLModification(expectedValue, actualValue, difference.toString(), applicationID);
+            modificationsNew.add(modification);
         }
         return modificationsNew;
     }
-
-    private String getXPathFromDifference(Difference difference) {
+    public String getActionFromDifference(Difference difference) {
         Comparison.Detail controlDetail = difference.getComparison().getControlDetails();
-        if (controlDetail != null) {
-            return controlDetail.getXPath();
-        }
         Comparison.Detail testDetail = difference.getComparison().getTestDetails();
-        if (testDetail != null) {
-            return testDetail.getXPath();
-        }
-        return null;
-    }
 
-    private String getExpectedValueFromDifference(Difference difference, File file) {
-        Comparison.Detail controlDetail = difference.getComparison().getControlDetails();
-        if (controlDetail != null) {
-            return getNodeValue(file, controlDetail.getTarget());
+        if (controlDetail != null && testDetail == null) {
+            return "deleted";
+        } else if (controlDetail == null && testDetail != null) {
+            return "added";
+        } else {
+            return "";
         }
-        return "";
-    }
-
-    private String getActualValueFromDifference(Difference difference, File file) {
-        Comparison.Detail testDetail = difference.getComparison().getTestDetails();
-        if (testDetail != null) {
-            return getNodeValue(file, testDetail.getTarget());
-        }
-        return "";
-    }
-    private String getNodeXPath(Node node) {
-        XPathEngine xPathEngine = new JAXPXPathEngine();
-        return xPathEngine.evaluate("node:name(.)", new DOMSource(node));
-    }
-
-    private String getNodeValue(File file, Node node) {
-        XPathEngine xPathEngine = new JAXPXPathEngine();
-        String xPath = getNodeXPath(node);
-        return xPathEngine.evaluate(xPath, Input.fromFile(file).build());
     }
 
 
@@ -299,25 +262,24 @@ public class Generic{
                 Cell cell = headerRow.createCell ( 0);
                 cell.setCellValue ("Application ID");
                 cell.setCellStyle (styleHeader);
-                cell= headerRow.createCell (1);
-                cell.setCellValue ("Tag Hierarchy");
+
                 cell.setCellStyle (styleHeader);
-                cell= headerRow.createCell (2);
+                cell= headerRow.createCell (1);
                 cell.setCellValue ( "Data in BeforeCode XML" );
                 cell.setCellStyle (styleHeader);
-                cell=headerRow.createCell (3);
+                cell=headerRow.createCell (2);
                 cell.setCellValue ("Data in AfterCode XMI");
                 cell.setCellStyle(styleHeader);
-                cell=headerRow.createCell (4);
-                cell.setCellValue ( "MisMatch Details");
+                cell=headerRow.createCell (3);
+                cell.setCellValue ( "Action");
                 cell.setCellStyle (styleHeader);
                 for (XMLModification modification:modifications) {
                     Row row=sheet.createRow(rownumber++);
                     row.createCell (0).setCellValue (modification.getApplicationId ( ));
-                    row.createCell (1).setCellValue (modification.getXpath());
-                    row.createCell (2).setCellValue (modification.getExpectedValue ( ));
-                    row.createCell (3).setCellValue (modification.getActualValue ( ));
-                    row.createCell (4).setCellValue (modification.getDescription ());
+
+                    row.createCell (1).setCellValue (modification.getExpectedValue ( ));
+                    row.createCell (2).setCellValue (modification.getActualValue ( ));
+                    row.createCell (3).setCellValue (modification.getAction ());
 
                     for (int i=0;i<6;i++) {
                         sheet.autoSizeColumn (i);
