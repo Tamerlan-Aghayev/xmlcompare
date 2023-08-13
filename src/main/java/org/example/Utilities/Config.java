@@ -19,17 +19,11 @@ public class Config {
 
 
 
+    public final static String BeforeFile = "C:\\Users\\ASUS\\Desktop\\test.xml";
 
+    public final static String AfterFile = "C:\\Users\\ASUS\\Desktop\\test2.xml";
 
-
-
-
-
-    public final static String BeforeFile = "H:\\Auto\\OutputBefore.xml";
-
-    public final static String AfterFile = "H:\\Auto\\OutputAfter.xml";
-
-    public final static String resultPath="H:\\Auto\\Differences.xlsx";
+    public final static String resultPath="C:\\Users\\ASUS\\Desktop\\Differences.xlsx";
 
 
 }

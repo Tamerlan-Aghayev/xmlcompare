@@ -7,7 +7,8 @@ import java.util.Stack;
 
 public class Main {
     public static void main(String[] args) {
-
+        Generic g= new Generic();
+        g.compareXmlFiles(Config.BeforeFile, Config.AfterFile);
 //        String inputFilePath = "C:\\Users\\ASUS\\Desktop\\test.txt";
 //        String outputFilePath = "C:\\Users\\ASUS\\Desktop\\test2.txt";
 //

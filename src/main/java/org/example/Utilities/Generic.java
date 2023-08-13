@@ -118,18 +118,19 @@ public class Generic{
                 NodeList childNodes = parentNode.getChildNodes();
                 for (int j = 0; i < childNodes.getLength(); j++) {
                     Node childNode = childNodes.item(j);
-//
-                    if (childNode.getNodeType() == Node.ELEMENT_NODE) {
-                        Element childElement = (Element) childNode;
 
-                        XSSFRow row = sheet.createRow(rowNum++);
-                        XSSFCell cell = row.createCell(0);
-                        cell.setCellValue(parentNode.getNodeName());
-                        cell = row.createCell(1);
-                        cell.setCellValue(childNode.getNodeName());
-                        cell = row.createCell(2);
-                        cell.setCellValue(childNode.getTextContent());
-                    }
+                            if (childNode.getNodeType() == Node.ELEMENT_NODE) {
+                                Element childElement = (Element) childNode;
+
+                                XSSFRow row = sheet.createRow(rowNum++);
+                                XSSFCell cell = row.createCell(0);
+                                cell.setCellValue(parentNode.getNodeName());
+                                cell = row.createCell(1);
+                                cell.setCellValue(childNode.getNodeName());
+                                cell = row.createCell(2);
+                                cell.setCellValue(childNode.getTextContent());
+                            }
+
                 }
             }
         }
@@ -182,10 +183,10 @@ public class Generic{
             String xPath = difference.getComparison().getControlDetails().getXPath();
             String expectedValue = String.valueOf(difference.getComparison().getControlDetails().getValue());
             String actualValue = String.valueOf(difference.getComparison().getTestDetails().getValue());
-
+            String action = String.valueOf(getActionFromDifference(difference));
             String applicationID = extractApplicationID(xPath, diff.getControlSource());
 
-            XMLModification modification = new XMLModification(expectedValue, actualValue, difference.toString(), applicationID);
+            XMLModification modification = new XMLModification(expectedValue, actualValue, difference.toString(), applicationID, action);
             modificationsNew.add(modification);
         }
         return modificationsNew;

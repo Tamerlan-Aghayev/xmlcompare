@@ -1,8 +1,18 @@
 package org.example.Utilities;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xmlunit.diff.Comparison;
 import org.xmlunit.diff.ComparisonResult;
 import org.xmlunit.diff.DifferenceEvaluator;
+import org.xmlunit.xpath.JAXPXPathEngine;
+import org.xmlunit.xpath.XPathEngine;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.Source;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class DetailedDifferenceEvaluator implements DifferenceEvaluator {
 
@@ -19,9 +29,8 @@ public class DetailedDifferenceEvaluator implements DifferenceEvaluator {
             String actualValue = String.valueOf(comparison.getTestDetails().getValue());
             String action = getActionFromDifference(comparison);
 
-            String applicationID = extractApplicationID(comparison);
 
-            modifications.add(new XMLModification(expectedValue, actualValue, action, applicationID));
+            modifications.add(new XMLModification(expectedValue, actualValue, action));
         }
         return outcome;
     }
@@ -39,10 +48,27 @@ public class DetailedDifferenceEvaluator implements DifferenceEvaluator {
         }
     }
 
-    private String extractApplicationID(Comparison comparison) {
-        // Your implementation to extract application ID based on the comparison
-        // You may need to adapt this method based on your specific XML structure
-        return "SampleApplicationID"; // Replace with the actual extracted application ID
+    private String extractApplicationID(String xPath, Source source) {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder;
+        try {
+            builder = factory.newDocumentBuilder();
+            Document document = builder.parse(new InputSource(source.getSystemId()));
+
+            Pattern pattern = Pattern.compile("LoanApplication\\[\\d+\\]");
+            Matcher matcher = pattern.matcher(xPath);
+            if (matcher.find()) {
+                int start = matcher.start();
+                int end = matcher.end();
+                String xPathRoot = xPath.substring(0, end);
+                xPathRoot += "/applicationID";
+                XPathEngine xPathEngine = new JAXPXPathEngine();
+                return xPathEngine.evaluate(xPathRoot, document);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }
 
