@@ -80,7 +80,6 @@ public class Generic {
         headerCell = headerRow.createCell(2);
         headerCell.setCellValue("Value");
         headerCell.setCellStyle(style);
-
         int rowNum = 1;
 
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -95,7 +94,6 @@ public class Generic {
                 NodeList childNodes = parentNode.getChildNodes();
                 for (int j = 0; j < childNodes.getLength(); j++) {
                     Node childNode = childNodes.item(j);
-
                     if (childNode.getNodeType() == Node.ELEMENT_NODE) {
                         Element childElement = (Element) childNode;
 
@@ -114,7 +112,6 @@ public class Generic {
         for (int i = 0; i < 3; i++) {
             sheet.autoSizeColumn(i);
         }
-
         inputStream.close();
         fileout = new FileOutputStream(Config.resultPath);
         workbook.write(fileout);
@@ -128,7 +125,6 @@ public class Generic {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         XmLModifier(path2);
         try {
             readXmIToExcel(path2, "AfterCode");
@@ -136,7 +132,6 @@ public class Generic {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         try {
             List<XMLModification> modifications = compareXmlFilesNew(path1, path2);
             writeToExcel(modifications, Config.resultPath);
@@ -148,10 +143,9 @@ public class Generic {
 
     public List<XMLModification> compareXmlFilesNew(String filePath1, String filePath2) {
         List<XMLModification> modifications = new ArrayList<>();
+
         File file1 = new File(filePath1);
         File file2 = new File(filePath2);
-
-        DifferenceEvaluator customEvaluator = new DetailedDifferenceEvaluator(modifications);
 
         Diff diff = DiffBuilder.compare(Input.fromFile(file1))
                 .withTest(Input.fromFile(file2))
@@ -159,40 +153,46 @@ public class Generic {
                 .checkForSimilar()
                 .ignoreWhitespace()
                 .ignoreComments()
-                .withDifferenceEvaluator(customEvaluator)
+                .withDifferenceEvaluator(new DetailedDifferenceEvaluator(modifications))
                 .build();
 
         Iterable<Difference> differences = diff.getDifferences();
+
         for (Difference difference : differences) {
-            String xPath = difference.getComparison().getControlDetails().getXPath();
             String expectedValue = String.valueOf(difference.getComparison().getControlDetails().getValue());
             String actualValue = String.valueOf(difference.getComparison().getTestDetails().getValue());
+            String xPath=difference.getComparison().getControlDetails ( ). getXPath ();
+            String action = "";
+            if (xPath==null) {
+                System.out.println("xpath-"+xPath);
+                xPath=difference.getComparison ().getTestDetails ().getXPath();}
+            Pattern pattern =Pattern.compile("LoanApplication\\[\\d+\\]");
+            Matcher matcher=pattern.matcher (xPath);
+            if(matcher.find ( )) {
+                int start = matcher.start();
+                int end = matcher.end();
+                String xPathRoot = xPath.substring(0, end);
+                xPathRoot += "/applicationID";
+                XPathEngine xPathEngine = new JAXPXPathEngine();
+                String applicationID = xPathEngine.evaluate(xPathRoot, diff.getControlSource());
 
-            String action;
-            if (difference.getResult() == ComparisonResult.EQUAL) {
-                action = "unchanged";
-            } else if (difference.getComparison().getControlDetails().getValue() == null) {
-                action = "added";
-                expectedValue = "";
-            } else if (difference.getComparison().getTestDetails().getValue() == null) {
-                action = "deleted";
-                actualValue = "";
-            } else {
-                action = "modified";
+                ComparisonResult outcome = difference.getResult();
+
+                if (outcome == ComparisonResult.DIFFERENT) {
+                    action = "modified";
+                } else if (outcome == ComparisonResult.SIMILAR) {
+                    action = "added";
+                }
+
+                modifications.add(new XMLModification(expectedValue, actualValue, action, applicationID));
             }
-
-            String xPathRoot = xPath + "/applicationID";
-            XPathEngine xPathEngine = new JAXPXPathEngine();
-            String applicationID = xPathEngine.evaluate(xPathRoot, diff.getControlSource());
-
-            modifications.add(new XMLModification(expectedValue, actualValue, action, applicationID));
         }
 
         return modifications;
     }
 
     public void writeToExcel(List<XMLModification> modifications, String excelFilePath) throws Exception {
-        Sheet sheet = workbook.createSheet("Differences");
+        Sheet sheet = workbook.createSheet("Difference");
         XSSFFont font = workbook.createFont();
         font.setBold(true);
 
@@ -220,34 +220,33 @@ public class Generic {
 
         Row headerRow = sheet.createRow(rownumber++);
         Cell cell = headerRow.createCell(0);
-        cell.setCellValue("Application ID");
+        cell.setCellValue("Expected Value");
         cell.setCellStyle(styleHeader);
-
         cell = headerRow.createCell(1);
-        cell.setCellValue("Data in BeforeCode XML");
+        cell.setCellValue("Actual Value");
         cell.setCellStyle(styleHeader);
         cell = headerRow.createCell(2);
-        cell.setCellValue("Data in AfterCode XML");
+        cell.setCellValue("Action");
         cell.setCellStyle(styleHeader);
         cell = headerRow.createCell(3);
-        cell.setCellValue("Action");
+        cell.setCellValue("Application ID");
         cell.setCellStyle(styleHeader);
 
         for (XMLModification modification : modifications) {
             Row row = sheet.createRow(rownumber++);
-            row.createCell(0).setCellValue(modification.getApplicationId());
-            row.createCell(1).setCellValue(modification.getExpectedValue());
-            row.createCell(2).setCellValue(modification.getActualValue());
-            row.createCell(3).setCellValue(modification.getAction());
-
-            for (int i = 0; i < 6; i++) {
-                sheet.autoSizeColumn(i);
-            }
-
-            fileout = new FileOutputStream(excelFilePath);
-            workbook.write(fileout);
-            fileout.close();
+            row.createCell(0).setCellValue(modification.getExpectedValue());
+            row.createCell(1).setCellValue(modification.getActualValue());
+            row.createCell(2).setCellValue(modification.getAction());
+            row.createCell(3).setCellValue(modification.getApplicationId());
         }
+
+        for (int i = 0; i < 4; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        fileout = new FileOutputStream(excelFilePath);
+        workbook.write(fileout);
+        fileout.close();
     }
 
     public void runAndCopyFiles() {

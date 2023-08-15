@@ -16,17 +16,18 @@ public class DetailedDifferenceEvaluator implements DifferenceEvaluator {
 
     @Override
     public ComparisonResult evaluate(Comparison comparison, ComparisonResult outcome) {
-        if (outcome == ComparisonResult.DIFFERENT) {
-            String xpath = comparison.getControlDetails().getXPath();
+        if (outcome == ComparisonResult.DIFFERENT || outcome == ComparisonResult.SIMILAR) {
             String expectedValue = String.valueOf(comparison.getControlDetails().getValue());
             String actualValue = String.valueOf(comparison.getTestDetails().getValue());
+            String action = "";
 
-            if (xpath == null) {
-                xpath = comparison.getTestDetails().getXPath();
-                modifications.add(new XMLModification(expectedValue, actualValue, "added", ""));
-            } else {
-                modifications.add(new XMLModification(expectedValue, actualValue, "deleted", ""));
+            if (outcome == ComparisonResult.DIFFERENT) {
+                action = "modified";
+            } else if (outcome == ComparisonResult.SIMILAR) {
+                action = "added";
             }
+
+            modifications.add(new XMLModification(expectedValue, actualValue, action, null));
         }
         return outcome;
     }
